@@ -104,5 +104,4 @@ scrape_articles <- function(base_url, lccn, keyword, page_limit = 5) {
 page_limit <- 20  # Increase this number for more data
 results <- scrape_articles(base_url, lccn, keyword, page_limit)
 
-# Print snippet
-#print(head(results)) #Just checking
+
