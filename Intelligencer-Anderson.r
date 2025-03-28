@@ -36,7 +36,6 @@ fetch_articles <- function(base_url, lccn, keyword = NULL, page_limit = 5) {
       parsed_data <- fromJSON(content(response, as = "text", encoding = "UTF-8"), flatten = TRUE)
 
 
-
       # Check and if null
       if (!is.null(parsed_data$totalItems)) {
         print(paste("Total items available:", parsed_data$totalItems))
@@ -106,4 +105,4 @@ page_limit <- 20  # Increase this number for more data
 results <- scrape_articles(base_url, lccn, keyword, page_limit)
 
 # Print snippet
-print(head(results)) #Just checking
+#print(head(results)) #Just checking
