@@ -11,8 +11,7 @@ lccn <- "sn84026965"  # The Anderson Intelligencer's LCCN
 keyword <- "textile"  # Search keyword
 
 # Output CSV path
-output_path <- "/Users/jenjones/Digitalhistory/Anderson-textiles 
-_news/anderson_articles.csv"
+output_path <-"github.com/Jen04Jones/Anderson-Mills/anderson_articles.csv" 
 
 # fetch article 
 fetch_articles <- function(base_url, lccn, keyword = NULL, page_limit = 5) {
