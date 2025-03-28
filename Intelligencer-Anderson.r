@@ -11,7 +11,8 @@ lccn <- "sn84026965"  # The Anderson Intelligencer's LCCN
 keyword <- "textile"  # Search keyword
 
 # Output path
-output_path <- "github.com/Jen04Jones/The-Intelligencer-Anderson/anderson_articles.csv"
+ output_path <- "anderson_articles.csv"
+
 
 write.csv(results %>% select(title, date, url, cleaned_text),
           output_path, row.names = FALSE)
