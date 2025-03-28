@@ -5,52 +5,49 @@ library(httr)
 library(jsonlite)
 library(dplyr)
 
-# Search API
+# API and variables
 base_url <- "https://chroniclingamerica.loc.gov/search/pages/results/"
 lccn <- "sn84026965"  # The Anderson Intelligencer's LCCN
 keyword <- "textile"  # Search keyword
 
-# Output CSV path
-output_path <- "/Users/jenjones/Digitalhistory/Anderson-textiles 
-_news/anderson_articles.csv"
+# Output path
+output_path <- "github.com/Jen04Jones/Anderson-Mills/anderson_articles.csv"
 
-# fetch article 
+write.csv(results %>% select(title, date, url, cleaned_text),
+          output_path, row.names = FALSE)
+print(paste("Results saved to", output_path))
+
+
+# Fetching Data
 fetch_articles <- function(base_url, lccn, keyword = NULL, page_limit = 5) {
   all_results <- data.frame()
   
   for (page in 1:page_limit) {
     query_url <- paste0(
       base_url, "?lccn=", lccn,
-
-  # AI (2025, March 24). Copilot
-
       if (!is.null(keyword)) paste0("&andtext=", keyword) else "",
       "&format=json&page=", page
     )
-    print(paste("Fetching data from:", query_url))  # Check data
+    print(paste("Fetching data from:", query_url))  # Debugging message
     
-    
-    # Get the text in UTF-8
     response <- GET(query_url)
     if (status_code(response) == 200) {
       parsed_data <- fromJSON(content(response, as = "text", encoding = "UTF-8"), flatten = TRUE)
-
-
-      # Check and if null
+      
+      # Check and print total available items
       if (!is.null(parsed_data$totalItems)) {
         print(paste("Total items available:", parsed_data$totalItems))
       }
       
-      # Results
+      # Extract data if results are available
       if (!is.null(parsed_data$items) && length(parsed_data$items) > 0) {
         batch <- as.data.frame(parsed_data$items) %>%
           select(
             title = "title",               # Title of the article
             date = "date",                 # Publication date
             url = "url",                   # URL of the newspaper page
-            ocr_eng = "ocr_eng"            # Text content (OCR) # suggestion by Copilot
+            ocr_eng = "ocr_eng"            # Text content (OCR) added here
           )
-        # AI (2025, March 24). Copilot.
         all_results <- bind_rows(all_results, batch)
         print(paste("Fetched", nrow(batch), "records from page", page))
       } else {
@@ -66,42 +63,38 @@ fetch_articles <- function(base_url, lccn, keyword = NULL, page_limit = 5) {
   return(all_results)
 }
 
-# AI (2025, March 24). Copilot. -gsub use for cleaning
-
-# Clean OCR Text
+# AI March 27 2025 Copilot, help with gsub use. 
 clean_text <- function(text) {
-  if (is.null(text)) return(NA) 
-
-    cleaned_text <- gsub("[[:space:]]+", " ", cleaned_text)
-    cleaned_text <- gsub("[\r\n]+", " ", text)
-
-
-        return(trimws(cleaned_text))             # Clean up
+  if (is.null(text)) return(NA)  # Handle NULL values
+  # Replace line breaks and unnecessary whitespace
+  cleaned_text <- gsub("\n", " ", text)     # Replace newline characters with space
+  cleaned_text <- gsub("\\s+", " ", cleaned_text) # Remove excessive spaces
+  return(trimws(cleaned_text))             # Trim leading/trailing spaces
 }
 
-# Save to csv file
-scrape_articles <- function(base_url, lccn, keyword, page_limit = 4) {
-  
+# Main function to scrape articles and save as CSV
+scrape_articles <- function(base_url, lccn, keyword, page_limit = 5) {
+ 
   results <- fetch_articles(base_url, lccn, keyword, page_limit)
   
   if (nrow(results) > 0) {
-    print("Cleaning article text.")
-
-
-    results$cleaned_text <- sapply(results$ocr_eng, cleaned_text)
+    print("Cleaning article text...")
+   
+    results$cleaned_text <- sapply(results$ocr_eng, clean_text)
     
-  # Keep Columns
-    write.csv(results %>% select(title, Date, url, cleaned_text), "anderson_articles.csv", row.names = FALSE)
-    print("Results saved to 'anderson_articles.csv'")
+   
+    write.csv(results %>% select(title, date, url, cleaned_text), "anderson_articles_cleaned.csv", row.names = FALSE)
+    print("Results saved to 'anderson_articles_cleaned.csv'")
   } else {
-    print("No articles found.")
+    print("No articles found. Check your query parameters or try a broader search.")
   }
   
   return(results)
 }
 
-# Scrapping
-page_limit <- 20  # Increase this number for more data
+
+page_limit <- 25 
 results <- scrape_articles(base_url, lccn, keyword, page_limit)
 
 
+#print(head(results))
