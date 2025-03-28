@@ -80,21 +80,21 @@ clean_text <- function(text) {
 }
 
 # Save to csv file
-scrape_articles <- function(base_url, lccn, keyword, page_limit = 5) {
+scrape_articles <- function(base_url, lccn, keyword, page_limit = 4) {
   
   results <- fetch_articles(base_url, lccn, keyword, page_limit)
   
   if (nrow(results) > 0) {
-    print("Cleaning article text...")
+    print("Cleaning article text.")
 
 
-    results$cleaned_text <- sapply(results$ocr_eng, Text_Content)
+    results$cleaned_text <- sapply(results$ocr_eng, cleaned_text)
     
   # Keep Columns
     write.csv(results %>% select(title, Date, url, cleaned_text), "anderson_articles.csv", row.names = FALSE)
     print("Results saved to 'anderson_articles.csv'")
   } else {
-    print("No articles found. Check your query parameters or try a broader search.")
+    print("No articles found.")
   }
   
   return(results)
